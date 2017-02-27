@@ -3,7 +3,7 @@
 $liFilme  = ($title=="Filme")  ? "<li class='active'>" : "<li>";
 $liSerie  = ($title=="Série")  ? "<li class='active'>" : "<li>";
 $liMusica = ($title=="Música") ? "<li class='active'>" : "<li>";
-$baseUrl = "https://myrenamer.herokuapp.com/";
+$baseUrl = "https://myrenamer.herokuapp.com";
 
 echo "<!DOCTYPE html>
 <html lang='pt-br'>
