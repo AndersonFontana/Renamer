@@ -1,5 +1,5 @@
 <?php
-	$title = "Filme";
+	$title = "Música";
 	include '../header.php';
 ?>
 
