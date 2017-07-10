@@ -4,7 +4,7 @@ echo "
 	<footer class='footer footer-transparent'>
 		<div class='container'>
 			<div class='copyright' style='text-align: center;'>
-				 © 2017 Anderson A. Fontana
+				 © 2017 <a href='https://github.com/AndersonFontana'>Anderson A. Fontana</a>
 			</div>
 		</div>
 	</footer>

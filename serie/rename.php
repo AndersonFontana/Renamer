@@ -4,73 +4,96 @@
 	$home = "../index.php";
 	$filme = "../filme";
 	$serie = "../serie";
-
-	include '../head.php';
+	$title = "Série";
+	include '../header.php';
 ?>
 
-<div>
-	<?php
+<script type="text/javascript">
+	function copyToClipboard(element) {
+		var $temp = $("<textarea>");
+		$("body").append($temp);
+		$temp.val($(element).text()).select();
+		document.execCommand("copy");
+		$temp.remove();
+	}
+</script>
+<div class="wrapper">
+	<div class="main">
+		<div class="container">
+			<div class="row" style="margin: 100px auto;">
+				<?php
 
-		$name = $_POST['serie'];
-		$temp = $_POST['temp'];
-		
+					// $res = file_get_contents('data.php?serie=flash&temp=3', FILE_USE_INCLUDE_PATH);
+					// $res = file_get_contents('http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/data.php?serie=flash&temp=3');
+					// $response = http_post_fields('http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/data.php', $_POST);
 
-		function Url2Content($link)
-		{
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $link);
-			curl_setopt($ch, CURLOPT_HEADER, FALSE);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $l);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+					$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/data.php';
 
-			$conteudo = curl_exec($ch);
-			curl_close($ch);
-			return $conteudo;
-		}
+					// use key 'http' even if you send the request to https://...
+					$options = array(
+					    'http' => array(
+					        'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+					        'method'  => 'POST',
+					        'content' => http_build_query($_POST)
+					    )
+					);
+					$context  = stream_context_create($options);
+					$res = file_get_contents($url, false, $context);
+					$res = (json_decode($res, true));
 
-		$url = "http://www.omdbapi.com/?t=".str_ireplace(' ', '%20', $name)."&Season=".$temp;
-		$conteudo = Url2Content($url);
+					if ($res['ok'])
+					{
+						$season = intval($res['season']);
 
-		if(preg_match("/\"Title\":\"(.+)\",\"Season\":\"(\d+)\",\"/", $conteudo, $matches))
-		{
-			$conteudo = preg_replace("/{\"Title\".+\[/", "", $conteudo);
-			$serie = $matches[1];
-			$season = $matches[2];
-			
-			$qtd = preg_match_all("/\"Title\":\"([^\"]+)\",\"Released\":\"(\d{4})-\d+-\d+\",\"Episode\":\"(\d+)\",\"imdbRating\":\"(\S.\S)\",\"imdbID\":\"(tt\d+)\"/", $conteudo, $matches);
+						echo "<h2 class='text-center'>".$season."ª Temp - <a href='http://www.imdb.com/title/".$res['imdbTT']."/'>".$res['name']."</a> (".$res['year'].")</h2>";
+						echo "</div><div class='row' style='margin: 100px auto;'>";
+						echo "
+						<table class='table'>
+							<thead>
+								<tr>
+									<th class='text-center'>Episode</th>
+									<th class='text-center'>Title</th>
+									<th class='text-center'>Year</th>
+									<th class='text-center'>Rating</th>
+									<th class='text-center'>Thumb</th>
+								</tr>
+							</thead>
+							<tbody>";
+						$raw = $season."ª Temp - ".$res['name']." (".$res['year'].")\n";
+						foreach ($res['episodes'] as $ep)
+						{
+							echo "
+								<tr>
+									<td class='text-center'>".$ep['episode']."</td>
+									<td class='text-center'>
+										<a href='http://www.imdb.com/title/".$ep['imdbTT']."/'>".$ep['title']."</a>
+									</td>
+									<td class='text-center'>".$ep['year']."</td>
+									<td class='text-center'>".$ep['rating']."</td>
+									<td class='text-center'><img src='".$ep['thumb']."'></td>
+								</tr>";
+							$raw .= "s".$res['season']."e".$ep['episode']." - ".$ep['title']." (".$ep['rating'].")\n";
+						}
+						echo "
+							</tbody>
+						</table>";
 
-			echo "<p>".$season."ª Temp - ".$serie." (".$matches[2][--$qtd].")</p><br>";
-
-			if(strlen($season)==1)
-				$season = "0".$season;
-
-			for ($i=0; $i <= $qtd; $i++)
-			{
-//				nome $matches[1][$i]
-//				data $matches[2][$i]
-//				ep   $matches[3][$i]
-//				imdb $matches[4][$i]
-//				tt   $matches[5][$i]
-
-				if(strlen($matches[3][$i])==1)
-					$matches[3][$i] = "0".$matches[3][$i];
-
-				if ($matches[4][$i] == "N/A")
-					$matches[4][$i] = "...";
-
-				$matches[1][$i] = str_ireplace(':', ' -', $matches[1][$i]);
-
-				echo "s".$season."e".$matches[3][$i]." - <a href=\"http://www.imdb.com/title/".$matches[5][$i]."/\">".$matches[1][$i]."</a> (".$matches[4][$i].")<br/>";
-			}
-		}
-		else
-			echo "<a href=\"http://".$url."\" >Erro</a>";
-		echo "<br>";
-
-	?>
-	<button onclick="window.history.go(-1)">Voltar</button>
+						echo "<p style='display: none' id='p1'>$raw</p>";
+					}
+					else
+					{
+						echo "<pre>";
+						var_dump($res);
+						echo "</pre>";
+					}
+				?>
+			</div>
+			<div class='row' style='margin: 100px auto;'>
+				<button class="btn btn-default" onclick="window.history.go(-1)">Voltar</button>
+				<button class="btn btn-default" style="float: right;" onclick="copyToClipboard('#p1')">Copiar RAW</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <?php include '../footer.php'; ?>
